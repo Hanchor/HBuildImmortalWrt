@@ -17,6 +17,7 @@ if [ "${UPGRADE_MODE:-no}" = "true" ] || [ "${UPGRADE_MODE:-no}" = "yes" ]; then
   cp -a /home/build/immortalwrt/files/. "$FILES_DIR"/
   rm -f "$FILES_DIR/etc/uci-defaults/99-custom.sh"
   echo "Upgrade image: excluded 99-custom.sh to preserve restored settings"
+  echo "Upgrade image: kept 98-x86-interface-roles.sh for untouched generic x86 defaults"
 else
   echo "Create pppoe-settings for a fresh installation image"
   mkdir -p /home/build/immortalwrt/files/etc/config
