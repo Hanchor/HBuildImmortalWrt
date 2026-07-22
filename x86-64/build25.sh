@@ -64,8 +64,8 @@ PACKAGES="$PACKAGES luci-i18n-package-manager-zh-cn"
 PACKAGES="$PACKAGES luci-i18n-ttyd-zh-cn"
 PACKAGES="$PACKAGES openssh-sftp-server"
 
-# NAS 802.3ad/LACP bonding
-PACKAGES="$PACKAGES kmod-bonding proto-bonding luci-proto-bonding"
+# NAS 802.3ad/LACP bonding (LuCI support is built into luci-mod-network on 25.12)
+PACKAGES="$PACKAGES kmod-bonding proto-bonding"
 
 # 文件管理器
 PACKAGES="$PACKAGES luci-i18n-filemanager-zh-cn"
