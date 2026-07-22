@@ -7,19 +7,26 @@ LOGFILE="/tmp/uci-defaults-log.txt"
 echo "Starting 99-custom.sh at $(date)" >> $LOGFILE
 echo "编译固件大小为: $PROFILE MB"
 echo "Include Docker: $INCLUDE_DOCKER"
+echo "Upgrade mode: ${UPGRADE_MODE:-no}"
 
-echo "Create pppoe-settings"
-mkdir -p  /home/build/immortalwrt/files/etc/config
-
-# 创建pppoe配置文件 yml传入环境变量ENABLE_PPPOE等 写入配置文件 供99-custom.sh读取
-cat << EOF > /home/build/immortalwrt/files/etc/config/pppoe-settings
+FILES_DIR="/home/build/immortalwrt/files"
+if [ "${UPGRADE_MODE:-no}" = "true" ] || [ "${UPGRADE_MODE:-no}" = "yes" ]; then
+  FILES_DIR="/tmp/upgrade-files"
+  rm -rf "$FILES_DIR"
+  mkdir -p "$FILES_DIR"
+  cp -a /home/build/immortalwrt/files/. "$FILES_DIR"/
+  rm -f "$FILES_DIR/etc/uci-defaults/99-custom.sh"
+  echo "Upgrade image: excluded 99-custom.sh to preserve restored settings"
+else
+  echo "Create pppoe-settings for a fresh installation image"
+  mkdir -p /home/build/immortalwrt/files/etc/config
+  # 该文件仅用于全新安装镜像；升级镜像沿用 sysupgrade 恢复的现有拨号配置。
+  cat << EOF > /home/build/immortalwrt/files/etc/config/pppoe-settings
 enable_pppoe=${ENABLE_PPPOE}
 pppoe_account=${PPPOE_ACCOUNT}
 pppoe_password=${PPPOE_PASSWORD}
 EOF
-
-echo "cat pppoe-settings"
-cat /home/build/immortalwrt/files/etc/config/pppoe-settings
+fi
 
 if [ -z "$CUSTOM_PACKAGES" ]; then
   echo "⚪️ 未选择 任何第三方软件包"
@@ -110,7 +117,7 @@ fi
 echo "$(date '+%Y-%m-%d %H:%M:%S') - Building image with the following packages:"
 echo "$PACKAGES"
 
-make image PROFILE="generic" PACKAGES="$PACKAGES" FILES="/home/build/immortalwrt/files" ROOTFS_PARTSIZE=$PROFILE
+make image PROFILE="generic" PACKAGES="$PACKAGES" FILES="$FILES_DIR" ROOTFS_PARTSIZE=$PROFILE
 
 if [ $? -ne 0 ]; then
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Build failed!"
